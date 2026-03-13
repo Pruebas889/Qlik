@@ -29,10 +29,14 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
 LOG = logging.getLogger(__name__)
 
+tiempo=30
+corto_tiempo=2
 
 def setup_driver() -> webdriver.Chrome:
     opts = Options()
@@ -54,9 +58,9 @@ def type_like_keyboard(driver: webdriver.Chrome, text: str, delay: float = 0.08,
                         driver.find_element(By.TAG_NAME, 'body').click()
                     except Exception:
                         pass
-                    time.sleep(0.12)
+                    time.sleep(2)
             except Exception:
-                time.sleep(0.12)
+                time.sleep(2)
 
         active = driver.switch_to.active_element
         if not active:
@@ -173,9 +177,9 @@ def _send_enter_windows() -> bool:
         KEYEVENTF_KEYUP = 0x0002
         VK_RETURN = 0x0D
         keybd_event(VK_RETURN, 0, 0, 0)
-        time.sleep(0.01)
+        time.sleep(1)
         keybd_event(VK_RETURN, 0, KEYEVENTF_KEYUP, 0)
-        time.sleep(0.06)
+        time.sleep(1)
         LOG.info('_send_enter_windows: Enter enviado')
         return True
     except Exception:
@@ -201,7 +205,7 @@ def focus_on_selector(driver: webdriver.Chrome, selector: str, timeout: float = 
             except Exception:
                 el = None
             if not el:
-                time.sleep(0.2)
+                time.sleep(1)
                 continue
 
             try:
@@ -267,7 +271,7 @@ def hover_on_selector(driver: webdriver.Chrome, selector: str, timeout: float = 
             except Exception:
                 el = None
             if not el:
-                time.sleep(0.25)
+                time.sleep(15)
                 continue
 
             try:
@@ -313,7 +317,7 @@ def hover_on_xpath(driver: webdriver.Chrome, xpath: str, timeout: float = 5.0) -
             except Exception:
                 el = None
             if not el:
-                time.sleep(0.25)
+                time.sleep(1)
                 continue
 
             try:
@@ -339,7 +343,7 @@ def hover_on_xpath(driver: webdriver.Chrome, xpath: str, timeout: float = 5.0) -
             except Exception:
                 LOG.debug("hover_on_xpath: dispatch JS falló", exc_info=True)
 
-            time.sleep(0.2)
+            time.sleep(corto_tiempo)
             return True
 
         LOG.debug("hover_on_xpath: no se encontró %s", xpath)
@@ -940,7 +944,7 @@ def upload_to_google_sheets(extracted: dict, spreadsheet_id: str, credentials_js
                         data_headers = existing_headers[1:]
 
                 # Clear entire sheet and write back the header row starting at B1 (A1 will hold header_a)
-                date_str = datetime.now().strftime('%Y-%m-%d')
+                date_str = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 # If clear requested, remove only data rows (row 2 and below) to preserve row 1
                 if clear:
                     try:
@@ -1214,7 +1218,7 @@ def upload_to_google_sheets(extracted: dict, spreadsheet_id: str, credentials_js
                             data_headers = existing_headers[1:]
 
                     # Clear sheet data and restore header (preserve row 1)
-                    date_str = datetime.now().strftime('%Y-%m-%d')
+                    date_str = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                     if clear:
                         try:
                             try:
@@ -1389,7 +1393,7 @@ def upload_to_google_sheets(extracted: dict, spreadsheet_id: str, credentials_js
 def _maybe_auto_upload(extracted: dict) -> None:
     try:
         # valores por defecto (proporcionados por el usuario). Preferir env vars si existen.
-        default_sa = r'C:\Users\dforero\Pictures\QLIK\estados-475119-24642bda896a.json'
+        default_sa = r'C:\Users\jperdomolc\Pictures\Qlik\top-virtue-476113-e9-b32d5f86b9df.json'
         default_sid = '1LTiGfBQd_Qd6zhmCGEHpX0Jgaa3KuMkuuE8oHwQ6x3M'
         sa = _os.environ.get('GOOGLE_SERVICE_ACCOUNT_JSON', default_sa)
         sid = _os.environ.get('GOOGLE_SHEET_ID', default_sid)
@@ -1413,8 +1417,8 @@ def run_once() -> None:
         "https://qlik.copservir.com/sense/app/d39c40fb-a304-4eaf-9a30-50b7279d33f1/"
         "sheet/4f191cdb-aa40-409d-86b2-497a427a8b6a/state/analysis"
     )
-    username = "qlik26"
-    password = "Clave123*"
+    username = "Qlikzona29"
+    password = "pF2A3f2x*"
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
     LOG.info('Starting minimal Qlik autofill (single run)')
@@ -1424,7 +1428,7 @@ def run_once() -> None:
     try:
         LOG.info("Opening %s", url)
         driver.get(url)
-        time.sleep(1)
+        time.sleep(30)
         try:
             # Intentar traer al frente el navegador abierto por este script
             try:
@@ -1435,12 +1439,14 @@ def run_once() -> None:
             pass
 
         try:
+            WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CSS_SELECTOR, "#grid > div:nth-child(8)")))
+            LOG.info("Elemento '%s' está presente", "#grid > div:nth-child(8)")
             if focus_on_selector(driver, "#grid > div:nth-child(8)", timeout=3.0):
                 LOG.info("Elemento '%s' enfocado correctamente", "#grid > div:nth-child(8)")
             else:
                 LOG.info("No se pudo enfocar el selector '%s' (continuando)", "#grid > div:nth-child(8)")
         except Exception:
-            LOG.debug('Error al intentar focus_on_selector', exc_info=True)
+            LOG.debug('Error al esperar o enfocar el selector focus_... ', exc_info=True)
 
         try:
             # Asegurar foco antes de escribir el username
@@ -1601,7 +1607,7 @@ def run_once() -> None:
                                                                     )
                                                                     LOG.info('Navegando a la segunda URL: %s', segunda_url)
                                                                     driver.get(segunda_url)
-                                                                    time.sleep(2)
+                                                                    time.sleep(30)
                                                                     try:
                                                                         bring_browser_to_front(driver)
                                                                     except Exception:
@@ -1686,7 +1692,7 @@ def run_once() -> None:
                                                                                                             # Subida automática usando la misma sintaxis/flujo que _maybe_auto_upload,
                                                                                                             # pero con la pestaña objetivo por defecto en 'Sheet1'.
                                                                                                             try:
-                                                                                                                default_sa = r'C:\Users\dforero\Pictures\QLIK\estados-475119-24642bda896a.json'
+                                                                                                                default_sa = r'C:\Users\jperdomolc\Pictures\Qlik\top-virtue-476113-e9-b32d5f86b9df.json'
                                                                                                                 default_sid = '1LTiGfBQd_Qd6zhmCGEHpX0Jgaa3KuMkuuE8oHwQ6x3M'
                                                                                                                 sa = _os.environ.get('GOOGLE_SERVICE_ACCOUNT_JSON', default_sa)
                                                                                                                 sid = _os.environ.get('GOOGLE_SHEET_ID', default_sid)
@@ -1774,12 +1780,23 @@ def main() -> None:
             except Exception:
                 LOG.exception('run_once: excepción no controlada durante la ejecución')
 
-            # calcular próxima 06:00 local
+            # calcular próxima ejecución a las 06:00, 06:30 o 12:30 local (12:30 solo fines de semana)
             now = datetime.now()
-            next_run = now.replace(hour=6, minute=0, second=0, microsecond=0)
-            if next_run <= now:
-                # ya pasó hoy -> programar para mañana
-                next_run = next_run + timedelta(days=1)
+            next_run_6_exact = now.replace(hour=6, minute=0, second=0, microsecond=0)
+            next_run_6 = now.replace(hour=6, minute=30, second=0, microsecond=0)
+            next_run_12 = now.replace(hour=12, minute=30, second=0, microsecond=0)
+            
+            # encontrar la próxima hora de ejecución
+            candidates = [next_run_6_exact, next_run_6]
+            if now.weekday() in [5, 6]:  # 5=Saturday, 6=Sunday
+                candidates.append(next_run_12)
+            future_candidates = [t for t in candidates if t > now]
+            if future_candidates:
+                next_run = min(future_candidates)
+            else:
+                # todas pasaron hoy, tomar la primera de mañana
+                next_run = min(candidates) + timedelta(days=1)
+            
             wait_seconds = (next_run - now).total_seconds()
             LOG.info('Siguiente ejecución programada para %s (en %d segundos)', next_run.isoformat(), int(wait_seconds))
 

@@ -1,4 +1,4 @@
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import sync_playwright # pyright: ignore[reportMissingImports]
 import time
 import logging
 
@@ -9,8 +9,8 @@ URL = (
     "https://qlik.copservir.com/sense/app/d39c40fb-a304-4eaf-9a30-50b7279d33f1/"
     "sheet/4f191cdb-aa40-409d-86b2-497a427a8b6a/state/analysis"
 )
-USERNAME = "qlik26"
-PASSWORD = "Clave123*"
+USERNAME = "Qlikzona29"
+PASSWORD = "pF2A3f2x*"
 
 
 def main():
